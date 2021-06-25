@@ -3,20 +3,20 @@ const cheerio = require('cheerio');
 const randomUseragent = require('random-useragent');
 
 // Melon -> https://www.melon.com/robots.txt -> acting like google bot can prevent rejection
-let GBOT_UA = "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Safari/537.36";
+let GBOT_UA = "Googlebot/2.1 (+http://www.google.com/bot.html)";
+
+// __neededVar__
+let genieplURL = 'http://genie.co.kr/WNQSH9';
+structPL(genieplURL);
 
 // __mainScript__
-let genieplURL = 'http://genie.co.kr/WNQSH9';
-let reqHeaders = {
-    headers: {
-        "User-Agent": randomUseragent.getRandom()
-    },
-    uri: genieplURL
-}
-
-structPL(reqHeaders);
-
-async function structPL(reqHeaders) {
+async function structPL(genieplURL) {
+    let reqHeaders = {
+        headers: {
+            "User-Agent": randomUseragent.getRandom()
+        },
+        uri: genieplURL
+    }
     try {
         let GSID = await reqGenieSID(reqHeaders);
         if (GSID.length !== 0) {
