@@ -2,7 +2,12 @@ const request = require('request');
 const cheerio = require('cheerio');
 const randomUseragent = require('random-useragent');
 
+// Melon -> https://www.melon.com/robots.txt -> acting like google bot can prevent rejection
+// "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Safari/537.36"
+
+let GBOT_UA = "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Safari/537.36";
 // __mainScript__
+
 let genieplURL = 'http://genie.co.kr/WNQSH9';
 let reqHeaders = {
     headers: {
@@ -20,12 +25,15 @@ async function structPL(reqHeaders) {
         let GSTT = await reqGenieSTT(GSID);
         if (GSTT.length !== 0) {
             console.log(GSTT);
-            let MSID = await reqMelonSID(GSTT);
-            if (MSID.length !== 0) {
-                console.log("!");
-                console.log(MSID);
-                console.log(melonSID);
+            try {
+                let MSID = await reqMelonSID(GSTT);
+                if (MSID.length !== 0) {
+                    console.log(MSID);
+                }
+            } catch (error) {
+                console.log(error);
             }
+            
         }
     }
 }
@@ -68,7 +76,7 @@ function reqGenieSTT(songid) {
                     songkeyword.push(songTitle.toString() + artist.toString());
                 }
             } else reject(error);
-            console.log(songid.length, songkeyword.length, i);
+            //console.log(songid.length, songkeyword.length, i);
             if (songid.length == i) {
                 resolve(songkeyword);
             }
@@ -81,46 +89,42 @@ function reqGenieSTT(songid) {
 function reqMelonSID(songkeyword) {
     return new Promise((resolve, reject) => {
     let melonSID = [];
-    let j = 1;
     songkeyword.forEach(elem => {
         let melonURL = 'https://www.melon.com/search/total/index.htm?q=' + encodeURI(elem) + '&section=&linkOrText=T&ipath=srch_form';
         reqHeaders = {
             headers: {
-                "User-Agent": randomUseragent.getRandom()
+                "User-Agent": GBOT_UA
             },
             uri: melonURL
         }
         let melonsongID = '';
+        //console.log(melonURL);
         request(reqHeaders, (error, response, html) => {
             if (!error && response.statusCode == 200) {
                 let $ = cheerio.load(html);
                 melonsongID = $('.tb_list.d_song_list table tbody tr').first().first('td').find('.wrap.pd_none input').attr('value');
-                if (!melonsongID) {
                     let melonreURL = 'https://www.melon.com/search/total/index.htm?q=' + encodeURI(elem[0]) + '&section=&linkOrText=T&ipath=srch_form';
                     reqHeaders = {
                         headers: {
-                            "User-Agent": randomUseragent.getRandom()
+                            "User-Agent": GBOT_UA
                         },
                         uri: melonreURL
                     }
                     request(reqHeaders, (error, response, html) => {
                         if (!error && response.statusCode == 200) {
                             let $ = cheerio.load(html);
-                            melonsongID = $('.tb_list.d_song_list table tbody tr').first().first('td').find('.wrap.pd_none input').attr('value');
+                            if (!melonsongID) {
+                                melonsongID = $('.tb_list.d_song_list table tbody tr').first().first('td').find('.wrap.pd_none input').attr('value');
+                            }
                             melonSID.push(melonsongID);
-                            console.log(melonsongID);
+                            console.log(songkeyword.length, melonSID.length);
+                            if (songkeyword.length === melonSID.length) {
+                                resolve(melonSID);
+                            }
                         } else reject(error);
                     })
-                } else {
-                    melonSID.push(melonsongID);
-                    console.log(melonsongID);
-                }
             } else reject(error);
         })
-        if (songkeyword.length === j) {
-            resolve(melonSID);
-        } else console.log(melonSID)
-        j += 1;
     })
     })
 }
