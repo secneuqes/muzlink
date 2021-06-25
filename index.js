@@ -6,6 +6,7 @@ const randomUseragent = require('random-useragent');
 // "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Safari/537.36"
 
 let GBOT_UA = "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Safari/537.36";
+
 // __mainScript__
 
 let genieplURL = 'http://genie.co.kr/WNQSH9';
@@ -117,7 +118,7 @@ function reqMelonSID(songkeyword) {
                                 melonsongID = $('.tb_list.d_song_list table tbody tr').first().first('td').find('.wrap.pd_none input').attr('value');
                             }
                             melonSID.push(melonsongID);
-                            console.log(songkeyword.length, melonSID.length);
+                            // console.log(songkeyword.length, melonSID.length);
                             if (songkeyword.length === melonSID.length) {
                                 resolve(melonSID);
                             }
