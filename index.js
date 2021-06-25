@@ -3,12 +3,9 @@ const cheerio = require('cheerio');
 const randomUseragent = require('random-useragent');
 
 // Melon -> https://www.melon.com/robots.txt -> acting like google bot can prevent rejection
-// "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Safari/537.36"
-
 let GBOT_UA = "Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Safari/537.36";
 
 // __mainScript__
-
 let genieplURL = 'http://genie.co.kr/WNQSH9';
 let reqHeaders = {
     headers: {
@@ -20,23 +17,28 @@ let reqHeaders = {
 structPL(reqHeaders);
 
 async function structPL(reqHeaders) {
-    let GSID = await reqGenieSID(reqHeaders);
-    if (GSID.length !== 0) {
-        console.log(GSID)
-        let GSTT = await reqGenieSTT(GSID);
-        if (GSTT.length !== 0) {
-            console.log(GSTT);
-            try {
-                let MSID = await reqMelonSID(GSTT);
-                if (MSID.length !== 0) {
-                    console.log(MSID);
+    try {
+        let GSID = await reqGenieSID(reqHeaders);
+        if (GSID.length !== 0) {
+            console.log(GSID)
+            let GSTT = await reqGenieSTT(GSID);
+            if (GSTT.length !== 0) {
+                console.log(GSTT);
+                try {
+                    let MSID = await reqMelonSID(GSTT);
+                    if (MSID.length !== 0) {
+                        console.log(MSID);
+                    }
+                } catch (error) {
+                    console.log(error);
                 }
-            } catch (error) {
-                console.log(error);
             }
-            
         }
+    } catch (e) {
+        console.log(e);
+        structPL(reqHeaders);
     }
+    
 }
 
 function reqGenieSID(reqHeaders) {
